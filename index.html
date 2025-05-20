@@ -59,37 +59,23 @@
 
 <script>
   async function handleInput() {
-    const input = document.getElementById("userInput").value;
+    const input = document.getElementById("userInput").value.trim();
     if (!input) return;
 
     const responseEl = document.getElementById("responseText");
-    responseEl.textContent = "思考中...";
+    responseEl.textContent = "🤖 正在思考中...";
 
-    // ==== 调用模型 API：这里默认使用 OpenAI GPT，你也可以换成讯飞星火 ====
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_OPENAI_API_KEY" // 替换成你的 API KEY
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: "你是一个文旅景区讲解员，请用生动简短的语言回答游客的问题。" },
-          { role: "user", content: input }
-        ]
-      })
-    });
+    try {
+      const result = await getSparkAnswer(input);
+      responseEl.textContent = result;
 
-    const data = await response.json();
-    const answer = data.choices[0].message.content;
-    responseEl.textContent = answer;
-
-    // ==== 使用浏览器语音合成 ====
-    const utterance = new SpeechSynthesisUtterance(answer);
-    utterance.lang = "zh-CN";
-    utterance.voice = speechSynthesis.getVoices().find(v => v.name.includes("Xiaoxiao") || v.lang === "zh-CN");
-    speechSynthesis.speak(utterance);
+      // 自动语音朗读回答
+      const utterance = new SpeechSynthesisUtterance(result);
+      utterance.lang = "zh-CN";
+      speechSynthesis.speak(utterance);
+    } catch (err) {
+      responseEl.textContent = err;
+    }
 
     document.getElementById("userInput").value = "";
   }
