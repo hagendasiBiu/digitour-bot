@@ -81,32 +81,19 @@
   }
 </script>
 <script>
-  async function getSparkAnswer(input) {
-    // 模拟回答，测试用
-    return `您刚才问的是：“${input}”。这是模拟回答，实际接入讯飞API后会替换掉。`;
-  }
+ async function getSparkAnswer(input) {
+  const response = await fetch('http://localhost:3000/ask', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ question: input })
+  });
 
-  async function handleInput() {
-    const input = document.getElementById("userInput").value.trim();
-    if (!input) return;
+  const data = await response.json();
+  return data.answer || '抱歉，我没有理解您的问题。';
+}
 
-    const responseEl = document.getElementById("responseText");
-    responseEl.textContent = "🤖 正在思考中...";
-
-    try {
-      const result = await getSparkAnswer(input);
-      responseEl.textContent = result;
-
-      // 自动语音朗读回答
-      const utterance = new SpeechSynthesisUtterance(result);
-      utterance.lang = "zh-CN";
-      speechSynthesis.speak(utterance);
-    } catch (err) {
-      responseEl.textContent = err;
-    }
-
-    document.getElementById("userInput").value = "";
-  }
 </script>
 
 </body>
